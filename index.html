@@ -413,7 +413,7 @@
     let allBooks = [];
     let activeCategory = 'all';
     let searchQuery = '';
-    let currentBookIndex = -1;
+    let currentBookId = null;
     let sortMode = localStorage.getItem('sortMode') || 'newest';
     let viewMode = localStorage.getItem('viewMode') || 'grid';
     let currentScale = 1.2;
@@ -453,9 +453,8 @@
       const strip = document.getElementById('lr-strip');
       strip.innerHTML = '';
       hist.forEach(h => {
-        const idx = allBooks.findIndex(b => b.id === h.id);
-        if (idx === -1) return;
-        const book = allBooks[idx];
+        const book = allBooks.find(b => b.id === h.id);
+        if (!book) return;
         const el = document.createElement('div');
         el.className = 'lr-card';
         el.innerHTML = `
@@ -464,7 +463,7 @@
           </div>
           <div class="lr-title">${h.title}</div>
         `;
-        el.addEventListener('click', () => openModal(idx));
+        el.addEventListener('click', () => openModal(book.id));
         const img = el.querySelector('img');
         if (img) img.addEventListener('error', function() {
           this.parentElement.innerHTML = '<div class="lr-thumb-fallback">📚</div>';
@@ -615,7 +614,7 @@
             <button class="book-btn">📖 Read Online</button>
           </div>
         `;
-        card.querySelector('.book-btn').addEventListener('click', () => openModal(book._index));
+        card.querySelector('.book-btn').addEventListener('click', () => openModal(book.id));
         const bmBtn = card.querySelector('.bookmark-btn');
         if (bmBtn) bmBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleBookmark(book.id, bmBtn); });
         const img = card.querySelector('.book-thumb');
@@ -676,11 +675,11 @@
     }
 
     // ── Modal ──
-    function openModal(index) {
-      const book = allBooks[index];
+    function openModal(id) {
+      const book = allBooks.find(b => b.id === id);
       if (!book) return;
-      currentBookIndex = index;
-      
+      currentBookId = id;
+
       document.getElementById('modal-title').textContent = book.title;
       document.getElementById('modal-author').textContent = [book.author, book.publication].filter(Boolean).join(' · ');
       document.getElementById('modal-open-link').href = book.pdf_url;
@@ -697,11 +696,11 @@
       // Reset PDF container
       document.getElementById('pdf-container').innerHTML = '';
       document.getElementById('pdf-loading').classList.remove('hidden');
-      
+
       document.getElementById('modal-overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
-      history.replaceState(null, '', `#book-${index}`);
-      
+      history.replaceState(null, '', `#book-${id}`);
+
       trackLastRead(book);
 
       // Load the PDF
@@ -709,7 +708,7 @@
     }
 
     function toggleBookmarkFromModal() {
-      const book = allBooks[currentBookIndex];
+      const book = allBooks.find(b => b.id === currentBookId);
       if (!book) return;
       const bmBtn = document.getElementById('modal-bookmark-btn');
       const nowActive = toggleBookmark(book.id, null);
@@ -721,12 +720,12 @@
     function closeModal() {
       document.getElementById('modal-overlay').classList.remove('open');
       document.body.style.overflow = '';
-      currentBookIndex = -1;
+      currentBookId = null;
       history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
     function copyBookLink() {
-      const url = `${window.location.origin}${window.location.pathname}#book-${currentBookIndex}`;
+      const url = `${window.location.origin}${window.location.pathname}#book-${currentBookId}`;
       const btn = document.getElementById('modal-copy-btn');
       const done = () => {
         btn.textContent = '✓ Copied!';
@@ -745,10 +744,10 @@
     }
 
     function handleHash() {
-      const match = window.location.hash.match(/^#book-(\d+)$/);
+      const match = window.location.hash.match(/^#book-([0-9a-fA-F-]{36})$/);
       if (match) {
-        const index = parseInt(match[1], 10);
-        if (index >= 0 && index < allBooks.length) openModal(index);
+        const id = match[1];
+        if (allBooks.some(b => b.id === id)) openModal(id);
       }
     }
 
