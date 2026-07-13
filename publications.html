@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Publications — Al Ilm Al Mahfuz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #060e0a; --bg2: #091410; --card: #0b1a13; --border: #163322; --border2: #1e4a30;
+      --green: #059669; --green2: #10b981; --green3: #34d399;
+      --text: #e2e8f0; --muted: #64748b; --muted2: #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 90vw 70vh at 50% -20%, rgba(5,150,105,.2) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 54px; background: rgba(6,14,10,.85); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: .9rem; font-weight: 700; color: var(--green3); text-decoration: none; }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { font-size: .82rem; font-weight: 500; color: var(--muted2); text-decoration: none; }
+    .nav-links a:hover { color: var(--green3); }
+
+    header { position: relative; z-index: 1; text-align: center; padding: 60px 20px 40px; }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800;
+      background: linear-gradient(90deg, var(--green2), var(--green3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    header p { color: var(--muted2); margin-top: 10px; font-size: .95rem; }
+
+    #grid-view { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+    #pub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+
+    .pub-card {
+      background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; cursor: pointer; transition: all .25s; backdrop-filter: blur(8px);
+    }
+    .pub-card:hover { transform: translateY(-4px); border-color: rgba(5,150,105,.4); box-shadow: 0 16px 40px rgba(0,0,0,.4); }
+    .pub-logo-wrap { width: 100%; aspect-ratio: 16/9; background: var(--bg2); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .pub-logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .pub-logo-fallback { font-size: 2.4rem; opacity: .4; }
+    .pub-body { padding: 16px; }
+    .pub-name { font-family: 'Space Grotesk', sans-serif; font-size: .95rem; font-weight: 600; color: var(--green3); }
+    .pub-arabic { font-size: .9rem; color: var(--muted2); margin-top: 3px; direction: rtl; }
+    .pub-region { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+    .pub-count { font-size: .72rem; color: var(--green2); margin-top: 8px; }
+
+    #detail-view { display: none; position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 30px 20px 80px; }
+    #detail-view.open { display: block; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted2);
+      background: none; border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px;
+      cursor: pointer; margin-bottom: 26px;
+    }
+    .back-btn:hover { color: var(--green3); border-color: var(--green); }
+    .detail-header { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 30px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .detail-logo-wrap { width: 140px; height: 90px; border-radius: 10px; overflow: hidden; background: var(--bg2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .detail-logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--green3); }
+    .detail-arabic { color: var(--muted2); margin-top: 6px; direction: rtl; }
+    .detail-region { font-size: .82rem; color: var(--muted); margin-top: 8px; }
+    .detail-desc { color: var(--muted2); font-size: .92rem; margin-top: 10px; line-height: 1.6; }
+    .detail-website { display: inline-block; margin-top: 10px; font-size: .8rem; color: var(--green2); text-decoration: none; }
+
+    #detail-books { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .book { background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all .25s; }
+    .book:hover { transform: translateY(-4px); border-color: rgba(5,150,105,.4); }
+    .book-thumb { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+    .book-thumb-fallback { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: var(--bg2); }
+    .book-body { padding: 12px; }
+    .book-title { font-family: 'Space Grotesk', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    #modal-overlay.open { display: flex; }
+    #modal { background: rgba(9,20,16,.97); border: 1px solid var(--border2); border-radius: 16px; width: 100%; max-width: 860px; height: 92vh; display: flex; flex-direction: column; overflow: hidden; }
+    @media (max-width: 768px) { #modal-overlay { padding: 0; } #modal { border-radius: 0; height: 100vh; max-width: 100vw; } }
+    #modal-header { display: flex; align-items: flex-start; gap: 14px; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+    #modal-info { flex: 1; }
+    #modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: var(--green3); }
+    #modal-author { font-size: .85rem; color: var(--muted2); margin-top: 4px; }
+    #modal-close { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; padding: 6px 10px; }
+    #modal-iframe-wrap { flex: 1; background: #000; }
+    #modal-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
+    #modal-footer { display: flex; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--border); }
+    .modal-action { flex: 1; padding: 10px; border-radius: 8px; font-size: .78rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), #047857); border: 1px solid rgba(5,150,105,.4); color: #fff; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted2); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Al Ilm Al Mahfuz</a>
+    <ul class="nav-links"><li><a href="index.html">Library</a></li></ul>
+  </nav>
+
+  <header>
+    <h1>Publications</h1>
+    <p>Trusted sources of Islamic knowledge</p>
+  </header>
+
+  <div id="grid-view">
+    <div id="pub-grid"><div class="empty-state">Loading…</div></div>
+  </div>
+
+  <div id="detail-view">
+    <button class="back-btn" onclick="showGrid()">← All Publications</button>
+    <div class="detail-header">
+      <div class="detail-logo-wrap">
+        <img id="detail-logo-img" src="" alt="" style="display:none">
+        <div id="detail-logo-fallback" class="pub-logo-fallback">📚</div>
+      </div>
+      <div>
+        <div id="detail-name" class="detail-name"></div>
+        <div id="detail-arabic" class="detail-arabic"></div>
+        <div id="detail-region" class="detail-region"></div>
+        <div id="detail-desc" class="detail-desc"></div>
+        <a id="detail-website" class="detail-website" href="#" target="_blank" style="display:none">Visit website →</a>
+      </div>
+    </div>
+    <div id="detail-books"></div>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal">
+      <div id="modal-header">
+        <div id="modal-info">
+          <div id="modal-title"></div>
+          <div id="modal-author"></div>
+        </div>
+        <button id="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-iframe-wrap"><iframe id="modal-iframe"></iframe></div>
+      <div id="modal-footer">
+        <a id="modal-open-link" class="modal-action btn-primary" href="#" target="_blank">Open PDF</a>
+        <button class="modal-action btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://eitbcbihrbldbfhdtumh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpdGJjYmlocmJsZGJmaGR0dW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkwNDksImV4cCI6MjA5OTE2NTA0OX0.17Do_sh7O31x2S-_P_hG-F30foIQ-fz4iKmXC9xL5Os';
+
+    async function sbSelect(table, query) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    }
+
+    const CATEGORY_ICONS = {
+      'Fatawa':'📖','Hadith':'📜','Fiqh':'⚖️','Aqeedah':'🌙',
+      'Refutation':'🛡️','Statement':'📣','Biography':'🧾',
+      'Arabic':'✍️','History':'🏛️','default':'📚',
+    };
+
+    let allPubs = [];
+    let allBooks = [];
+
+    async function loadData() {
+      try {
+        const [pubsData, booksData] = await Promise.all([
+          sbSelect('publications', 'select=*&order=created_at.desc'),
+          sbSelect('books', 'select=*&order=created_at.desc')
+        ]);
+        allPubs = pubsData || [];
+        allBooks = booksData || [];
+        renderGrid();
+        handleHash();
+      } catch (e) {
+        document.getElementById('pub-grid').innerHTML =
+          '<div class="empty-state">Could not load publications. ' + e.message + '</div>';
+      }
+    }
+    loadData();
+
+    function renderGrid() {
+      const grid = document.getElementById('pub-grid');
+      if (allPubs.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No publications yet.</div>';
+        return;
+      }
+      grid.innerHTML = '';
+      allPubs.forEach(pub => {
+        const count = allBooks.filter(b => b.publication && b.publication.toLowerCase() === pub.name.toLowerCase()).length;
+        const card = document.createElement('div');
+        card.className = 'pub-card';
+        card.innerHTML = `
+          <div class="pub-logo-wrap">
+            ${pub.logo_url ? `<img src="${pub.logo_url}" alt="${pub.name}">` : `<div class="pub-logo-fallback">📚</div>`}
+          </div>
+          <div class="pub-body">
+            <div class="pub-name">${pub.name}</div>
+            ${pub.arabic ? `<div class="pub-arabic">${pub.arabic}</div>` : ''}
+            ${pub.region ? `<div class="pub-region">${pub.region}</div>` : ''}
+            <div class="pub-count">${count} book${count !== 1 ? 's' : ''}</div>
+          </div>
+        `;
+        card.addEventListener('click', () => showDetail(pub.id));
+        grid.appendChild(card);
+      });
+    }
+
+    function showDetail(pubId) {
+      const pub = allPubs.find(p => p.id === pubId);
+      if (!pub) return;
+      const pubBooks = allBooks.filter(b => b.publication && b.publication.toLowerCase() === pub.name.toLowerCase());
+
+      document.getElementById('detail-name').textContent = pub.name;
+      document.getElementById('detail-arabic').textContent = pub.arabic || '';
+      document.getElementById('detail-region').textContent = pub.region || '';
+      document.getElementById('detail-desc').textContent = pub.description || '';
+
+      const logoImg = document.getElementById('detail-logo-img');
+      const logoFallback = document.getElementById('detail-logo-fallback');
+      if (pub.logo_url) {
+        logoImg.src = pub.logo_url; logoImg.style.display = 'block'; logoFallback.style.display = 'none';
+      } else {
+        logoImg.style.display = 'none'; logoFallback.style.display = 'flex';
+      }
+
+      const websiteEl = document.getElementById('detail-website');
+      if (pub.website) { websiteEl.href = pub.website; websiteEl.style.display = 'inline-block'; }
+      else { websiteEl.style.display = 'none'; }
+
+      const booksContainer = document.getElementById('detail-books');
+      booksContainer.innerHTML = '';
+      if (pubBooks.length === 0) {
+        booksContainer.innerHTML = '<div class="empty-state">No books found for this publication.</div>';
+      } else {
+        pubBooks.forEach(book => {
+          const icon = CATEGORY_ICONS[book.category] || CATEGORY_ICONS.default;
+          const card = document.createElement('div');
+          card.className = 'book';
+          card.innerHTML = `
+            ${book.cover_url ? `<img class="book-thumb" src="${book.cover_url}" alt="${book.title}">` : `<div class="book-thumb-fallback">${icon}</div>`}
+            <div class="book-body"><div class="book-title">${book.title}</div></div>
+          `;
+          card.addEventListener('click', () => openModal(book));
+          booksContainer.appendChild(card);
+        });
+      }
+
+      document.getElementById('grid-view').style.display = 'none';
+      document.getElementById('detail-view').classList.add('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      history.replaceState(null, '', `#${pubId}`);
+    }
+
+    function showGrid() {
+      document.getElementById('detail-view').classList.remove('open');
+      document.getElementById('grid-view').style.display = 'block';
+      history.replaceState(null, '', window.location.pathname);
+    }
+
+    function handleHash() {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) showDetail(hash);
+    }
+    window.addEventListener('hashchange', handleHash);
+
+    function openModal(book) {
+      document.getElementById('modal-title').textContent = book.title;
+      document.getElementById('modal-author').textContent = [book.author, book.publication].filter(Boolean).join(' · ');
+      document.getElementById('modal-iframe').src = book.pdf_url;
+      document.getElementById('modal-open-link').href = book.pdf_url;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.getElementById('modal-iframe').src = '';
+      document.body.style.overflow = '';
+    }
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>
