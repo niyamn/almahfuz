@@ -6,7 +6,6 @@
   <title>Al Ilm Al Mahfuz — The Preserved Knowledge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
@@ -288,7 +287,6 @@
     <ul class="nav-links">
       <li><a href="#books-section">Library</a></li>
       <li><a href="publications.html">Publications</a></li>
-      <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
 
@@ -315,7 +313,7 @@
     </div>
     <div class="filters" id="filters">
       <button class="filter-btn active" data-cat="all">All Books</button>
-      <button class="filter-btn" data-cat="__bookmarks__">🔖 Saved <span class="count" id="bookmark-count">0</span></button>
+      <button class="filter-btn" data-cat="__bookmarks__"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px;margin-right:3px"><path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z"/></svg>Saved <span class="count" id="bookmark-count">0</span></button>
     </div>
     <div class="toolbar-row">
       <select class="sort-select" id="sort-select">
@@ -357,30 +355,12 @@
 
       <div id="modal-footer">
         <a id="modal-open-link" class="modal-action btn-primary" href="#" target="_blank">📄 Open PDF</a>
-        <button id="modal-bookmark-btn" class="modal-action btn-bookmark-modal" onclick="toggleBookmarkFromModal()">🔖 Save</button>
+        <button id="modal-bookmark-btn" class="modal-action btn-bookmark-modal" onclick="toggleBookmarkFromModal()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z"/></svg>Save</button>
         <button id="modal-copy-btn" class="modal-action btn-copy" onclick="copyBookLink()">🔗 Copy Link</button>
         <button class="modal-action btn-secondary" onclick="closeModal()">Close</button>
       </div>
     </div>
   </div>
-
-  <section id="contact">
-    <div class="section-divider"><span>✦</span></div>
-    <div class="contact-heading">
-      <h2>Contact Us</h2>
-      <p>Reach out for suggestions, book requests or to report broken links</p>
-    </div>
-    <div class="contact-grid" style="grid-template-columns:1fr;max-width:360px;margin:0 auto 16px">
-      <a class="contact-card" href="mailto:askibidimogger@proton.me">
-        <span class="c-icon">✉️</span>
-        <span class="c-title">Email Us</span>
-        <span class="c-sub">askibidimogger@proton.me</span>
-      </a>
-    </div>
-    <div class="contact-note">
-      <p>Want to <strong>suggest a book</strong> or report a broken link?<br/>We welcome all contributions to preserve Islamic knowledge.</p>
-    </div>
-  </section>
 
   <footer>
     <span class="footer-logo">Al Ilm Al Mahfuz</span>
@@ -394,14 +374,27 @@
     // ── Supabase config ──
     const SUPABASE_URL = 'https://eitbcbihrbldbfhdtumh.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpdGJjYmlocmJsZGJmaGR0dW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkwNDksImV4cCI6MjA5OTE2NTA0OX0.17Do_sh7O31x2S-_P_hG-F30foIQ-fz4iKmXC9xL5Os';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-    });
+
+    // Plain REST call — avoids the Supabase JS SDK's auth module entirely,
+    // since this page only ever reads public data and never needs login.
+    async function sbSelect(table, query) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    }
 
     // ── Helpers ──
     function slugify(str) {
       return str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
     }
+
+    const BOOKMARK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z"/></svg>';
+    const BOOKMARK_SVG_OUTLINE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z"/></svg>';
 
     const CATEGORY_ICONS = {
       'Fatawa':'📖','Hadith':'📜','Fiqh':'⚖️','Aqeedah':'🌙',
@@ -473,19 +466,19 @@
 
     // ── Load books ──
     async function loadBooks() {
-      const { data, error } = await sb.from('books').select('*').order('created_at', { ascending: false });
-      if (error) {
+      try {
+        const data = await sbSelect('books', 'select=*&order=created_at.desc');
+        allBooks = data || [];
+        buildFilters(allBooks);
+        renderBooks();
+        buildStats(allBooks);
+        renderLastRead();
+        updateBookmarkCount();
+        handleHash();
+      } catch (e) {
         document.getElementById('books').innerHTML =
-          '<p style="color:var(--muted);text-align:center;padding:40px;grid-column:1/-1">Could not load books. ' + error.message + '</p>';
-        return;
+          '<p style="color:var(--muted);text-align:center;padding:40px;grid-column:1/-1">Could not load books. ' + e.message + '</p>';
       }
-      allBooks = data || [];
-      buildFilters(allBooks);
-      renderBooks();
-      buildStats(allBooks);
-      renderLastRead();
-      updateBookmarkCount();
-      handleHash();
     }
     loadBooks();
 
@@ -577,7 +570,7 @@
       if (filtered.length === 0) {
         empty.style.display = 'block';
         empty.querySelector('p').textContent = activeCategory === '__bookmarks__'
-          ? 'No saved books yet. Tap 🔖 on any book to save it.'
+          ? 'No saved books yet. Tap the bookmark icon on any book to save it.'
           : 'No books found for your search.';
         return;
       }
@@ -596,9 +589,9 @@
           ? `<div class="book-cover-area">
                <img class="book-thumb" src="${book.cover_url}" alt="${book.title}">
                <div class="book-thumb-fallback" style="display:none">${icon}</div>
-               <button class="bookmark-btn ${bookmarked ? 'active' : ''}" title="Save for later">🔖</button>
+               <button class="bookmark-btn ${bookmarked ? 'active' : ''}" title="Save for later">${BOOKMARK_SVG}</button>
              </div>`
-          : `<div class="book-cover-area"><div class="book-thumb-fallback">${icon}</div><button class="bookmark-btn ${bookmarked ? 'active' : ''}" title="Save for later">🔖</button></div>`;
+          : `<div class="book-cover-area"><div class="book-thumb-fallback">${icon}</div><button class="bookmark-btn ${bookmarked ? 'active' : ''}" title="Save for later">${BOOKMARK_SVG}</button></div>`;
 
         const card = document.createElement('div');
         card.className = 'book';
@@ -689,7 +682,7 @@
 
       const bmBtn = document.getElementById('modal-bookmark-btn');
       const marked = isBookmarked(book.id);
-      bmBtn.textContent = marked ? '✓ Saved' : '🔖 Save';
+      bmBtn.innerHTML = marked ? '✓ Saved' : BOOKMARK_SVG + 'Save';
       bmBtn.classList.toggle('active', marked);
 
       // Reset PDF container
@@ -711,7 +704,7 @@
       if (!book) return;
       const bmBtn = document.getElementById('modal-bookmark-btn');
       const nowActive = toggleBookmark(book.id, null);
-      bmBtn.textContent = nowActive ? '✓ Saved' : '🔖 Save';
+      bmBtn.innerHTML = nowActive ? '✓ Saved' : BOOKMARK_SVG + 'Save';
       bmBtn.classList.toggle('active', nowActive);
       renderBooks();
     }
