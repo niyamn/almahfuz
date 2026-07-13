@@ -238,7 +238,11 @@
       }
 
       const websiteEl = document.getElementById('detail-website');
-      if (pub.website) { websiteEl.href = pub.website; websiteEl.style.display = 'inline-block'; }
+      if (pub.website) {
+        const url = /^https?:\/\//i.test(pub.website) ? pub.website : `https://${pub.website}`;
+        websiteEl.href = url;
+        websiteEl.style.display = 'inline-block';
+      }
       else { websiteEl.style.display = 'none'; }
 
       const booksContainer = document.getElementById('detail-books');
