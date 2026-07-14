@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guide — Al Ilm Al Mahfuz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #060e0a; --bg2: #091410; --card: #0b1a13; --border: #163322; --border2: #1e4a30;
+      --green: #059669; --green2: #10b981; --green3: #34d399;
+      --text: #e2e8f0; --muted: #64748b; --muted2: #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 90vw 70vh at 50% -20%, rgba(5,150,105,.2) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 54px; background: rgba(6,14,10,.85); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: .9rem; font-weight: 700; color: var(--green3); text-decoration: none; }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { font-size: .82rem; font-weight: 500; color: var(--muted2); text-decoration: none; }
+    .nav-links a:hover, .nav-links a.active { color: var(--green3); }
+
+    header { position: relative; z-index: 1; text-align: center; padding: 56px 20px 36px; }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800;
+      background: linear-gradient(90deg, var(--green2), var(--green3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    header p { color: var(--muted2); margin-top: 10px; font-size: .92rem; }
+
+    .section-wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 20px 50px; }
+    .section-label {
+      font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--green); opacity: .8; margin-bottom: 14px;
+    }
+
+    /* Topics */
+    #topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 50px; }
+    .topic-card {
+      background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px 14px; text-align: center; cursor: pointer; transition: all .2s; text-decoration: none;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .topic-card:hover { border-color: rgba(5,150,105,.4); transform: translateY(-3px); background: rgba(5,150,105,.06); }
+    .topic-icon { font-size: 1.6rem; }
+    .topic-name { font-family: 'Space Grotesk', sans-serif; font-size: .82rem; font-weight: 600; color: var(--text); }
+    .topic-count { font-size: .68rem; color: var(--muted); }
+
+    /* Topic book grid (shown inline when a topic is clicked) */
+    #topic-books-section { display: none; margin-bottom: 50px; }
+    #topic-books-section.open { display: block; }
+    .topic-books-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .topic-books-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: var(--green3); }
+    .topic-close-btn {
+      background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted);
+      cursor: pointer; padding: 5px 12px; font-size: .78rem;
+    }
+    .topic-close-btn:hover { border-color: var(--green); color: var(--green3); }
+    #topic-books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+    .mini-book { background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all .2s; }
+    .mini-book:hover { border-color: rgba(5,150,105,.4); transform: translateY(-3px); }
+    .mini-book img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+    .mini-book-fallback { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: var(--bg2); }
+    .mini-book-title { padding: 8px 10px; font-size: .76rem; color: var(--text); line-height: 1.3; }
+
+    /* Posts */
+    .post-card {
+      background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px 24px; margin-bottom: 18px; backdrop-filter: blur(8px);
+    }
+    .post-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--green3); margin-bottom: 6px; }
+    .post-date { font-size: .74rem; color: var(--muted); margin-bottom: 14px; }
+    .post-content { font-size: .92rem; line-height: 1.75; color: #cbd5e1; }
+    .post-content h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.02rem; color: var(--green3); margin: 18px 0 8px; }
+    .post-content p { margin-bottom: 12px; }
+    .post-content ul { margin: 0 0 12px 22px; }
+    .post-content li { margin-bottom: 4px; }
+    .post-content strong { color: var(--text); }
+
+    .post-books { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .post-book-chip {
+      display: flex; align-items: center; gap: 8px; background: rgba(5,150,105,.08);
+      border: 1px solid rgba(5,150,105,.2); border-radius: 20px; padding: 5px 12px 5px 5px;
+      cursor: pointer; transition: all .2s; text-decoration: none;
+    }
+    .post-book-chip:hover { border-color: var(--green); background: rgba(5,150,105,.15); }
+    .post-book-chip img { width: 26px; height: 34px; object-fit: cover; border-radius: 4px; }
+    .post-book-chip-fallback { width: 26px; height: 34px; border-radius: 4px; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: .8rem; }
+    .post-book-chip span { font-size: .78rem; color: var(--green3); }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: .88rem; }
+
+    /* Modal reader (shared with index.html) */
+    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    #modal-overlay.open { display: flex; }
+    #modal { background: rgba(9,20,16,.97); border: 1px solid var(--border2); border-radius: 16px; width: 100%; max-width: 860px; height: 92vh; height: 92dvh; display: flex; flex-direction: column; overflow: hidden; }
+    @media (max-width: 768px) { #modal-overlay { padding: 0; } #modal { border-radius: 0; height: 100vh; height: 100dvh; max-width: 100vw; } }
+    #modal-header { display: flex; align-items: flex-start; gap: 14px; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #modal-info { flex: 1; }
+    #modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: var(--green3); }
+    #modal-author { font-size: .85rem; color: var(--muted2); margin-top: 4px; }
+    #modal-close { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; padding: 6px 10px; }
+    #modal-iframe-wrap { flex: 1; background: #000; }
+    #modal-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
+    #modal-footer { display: flex; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .modal-action { flex: 1; padding: 10px; border-radius: 8px; font-size: .78rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), #047857); border: 1px solid rgba(5,150,105,.4); color: #fff; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted2); }
+
+    footer { position: relative; z-index: 1; text-align: center; padding: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: .8rem; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Al Ilm Al Mahfuz</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Library</a></li>
+      <li><a href="publications.html">Publications</a></li>
+      <li><a href="guide.html" class="active">Guide</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>Guide</h1>
+    <p>Where to start, and what to read next</p>
+  </header>
+
+  <div class="section-wrap">
+    <div class="section-label">Browse by Topic</div>
+    <div id="topics-grid"></div>
+
+    <div id="topic-books-section">
+      <div class="topic-books-header">
+        <h2 id="topic-books-title"></h2>
+        <button class="topic-close-btn" onclick="closeTopicBooks()">Close</button>
+      </div>
+      <div id="topic-books-grid"></div>
+    </div>
+
+    <div class="section-label">Posts</div>
+    <div id="posts-list"></div>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal">
+      <div id="modal-header">
+        <div id="modal-info">
+          <div id="modal-title"></div>
+          <div id="modal-author"></div>
+        </div>
+        <button id="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-iframe-wrap"><iframe id="modal-iframe"></iframe></div>
+      <div id="modal-footer">
+        <a id="modal-open-link" class="modal-action btn-primary" href="#" target="_blank">Open PDF</a>
+        <button class="modal-action btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Al Ilm Al Mahfuz — Preserving Islamic Knowledge for the Ummah</p>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://eitbcbihrbldbfhdtumh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpdGJjYmlocmJsZGJmaGR0dW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkwNDksImV4cCI6MjA5OTE2NTA0OX0.17Do_sh7O31x2S-_P_hG-F30foIQ-fz4iKmXC9xL5Os';
+
+    async function sbSelect(table, query) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    }
+
+    const CATEGORY_ICONS = {
+      'Fatawa':'📖','Hadith':'📜','Fiqh':'⚖️','Aqeedah':'🌙',
+      'Refutation':'🛡️','Statement':'📣','Biography':'🧾',
+      'Arabic':'✍️','History':'🏛️','default':'📚',
+    };
+
+    let allBooks = [];
+    let allPosts = [];
+
+    async function loadAll() {
+      try {
+        const [books, posts] = await Promise.all([
+          sbSelect('books', 'select=*&order=created_at.desc'),
+          sbSelect('posts', 'select=*&order=created_at.desc')
+        ]);
+        allBooks = books || [];
+        allPosts = posts || [];
+        renderTopics();
+        renderPosts();
+      } catch (e) {
+        document.getElementById('posts-list').innerHTML = `<div class="empty-state">Could not load. ${e.message}</div>`;
+      }
+    }
+    loadAll();
+
+    function renderTopics() {
+      const cats = [...new Set(allBooks.map(b => b.category).filter(Boolean))].sort();
+      const grid = document.getElementById('topics-grid');
+      if (cats.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No topics yet.</div>';
+        return;
+      }
+      grid.innerHTML = '';
+      cats.forEach(cat => {
+        const count = allBooks.filter(b => b.category === cat).length;
+        const icon = CATEGORY_ICONS[cat] || CATEGORY_ICONS.default;
+        const card = document.createElement('div');
+        card.className = 'topic-card';
+        card.innerHTML = `
+          <div class="topic-icon">${icon}</div>
+          <div class="topic-name">${cat}</div>
+          <div class="topic-count">${count} book${count !== 1 ? 's' : ''}</div>
+        `;
+        card.addEventListener('click', () => openTopicBooks(cat));
+        grid.appendChild(card);
+      });
+    }
+
+    function openTopicBooks(cat) {
+      const books = allBooks.filter(b => b.category === cat);
+      document.getElementById('topic-books-title').textContent = cat;
+      const grid = document.getElementById('topic-books-grid');
+      grid.innerHTML = '';
+      books.forEach(book => {
+        const icon = CATEGORY_ICONS[book.category] || CATEGORY_ICONS.default;
+        const el = document.createElement('div');
+        el.className = 'mini-book';
+        el.innerHTML = `
+          ${book.cover_url ? `<img src="${book.cover_url}" alt="${book.title}">` : `<div class="mini-book-fallback">${icon}</div>`}
+          <div class="mini-book-title">${book.title}</div>
+        `;
+        el.addEventListener('click', () => openModal(book));
+        grid.appendChild(el);
+      });
+      document.getElementById('topic-books-section').classList.add('open');
+      document.getElementById('topic-books-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeTopicBooks() {
+      document.getElementById('topic-books-section').classList.remove('open');
+    }
+
+    // ── Tiny markdown-lite renderer: **bold**, # heading, - list items, paragraphs ──
+    function renderContent(text) {
+      const lines = text.split('\n');
+      let html = '';
+      let inList = false;
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) { if (inList) { html += '</ul>'; inList = false; } continue; }
+        if (line.startsWith('# ')) {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += `<h2>${escapeAndBold(line.slice(2))}</h2>`;
+        } else if (line.startsWith('- ')) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += `<li>${escapeAndBold(line.slice(2))}</li>`;
+        } else {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += `<p>${escapeAndBold(line)}</p>`;
+        }
+      }
+      if (inList) html += '</ul>';
+      return html;
+    }
+    function escapeAndBold(str) {
+      const escaped = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function renderPosts() {
+      const container = document.getElementById('posts-list');
+      if (allPosts.length === 0) {
+        container.innerHTML = '<div class="empty-state">No posts yet.</div>';
+        return;
+      }
+      container.innerHTML = '';
+      allPosts.forEach(post => {
+        const date = new Date(post.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+        const linkedBooks = (post.linked_book_ids || [])
+          .map(id => allBooks.find(b => b.id === id))
+          .filter(Boolean);
+
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.innerHTML = `
+          <div class="post-title">${post.title}</div>
+          <div class="post-date">${date}</div>
+          <div class="post-content">${renderContent(post.content)}</div>
+          ${linkedBooks.length ? `<div class="post-books"></div>` : ''}
+        `;
+        if (linkedBooks.length) {
+          const booksWrap = card.querySelector('.post-books');
+          linkedBooks.forEach(book => {
+            const icon = CATEGORY_ICONS[book.category] || CATEGORY_ICONS.default;
+            const chip = document.createElement('div');
+            chip.className = 'post-book-chip';
+            chip.innerHTML = `
+              ${book.cover_url ? `<img src="${book.cover_url}" alt="">` : `<div class="post-book-chip-fallback">${icon}</div>`}
+              <span>${book.title}</span>
+            `;
+            chip.addEventListener('click', () => openModal(book));
+            booksWrap.appendChild(chip);
+          });
+        }
+        container.appendChild(card);
+      });
+    }
+
+    function openModal(book) {
+      document.getElementById('modal-title').textContent = book.title;
+      document.getElementById('modal-author').textContent = [book.author, book.publication].filter(Boolean).join(' · ');
+      document.getElementById('modal-iframe').src = book.pdf_url;
+      document.getElementById('modal-open-link').href = book.pdf_url;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.getElementById('modal-iframe').src = '';
+      document.body.style.overflow = '';
+    }
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>
