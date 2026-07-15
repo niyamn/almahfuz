@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Authors — Al Ilm Al Mahfuz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #060e0a; --bg2: #091410; --card: #0b1a13; --border: #163322; --border2: #1e4a30;
+      --green: #059669; --green2: #10b981; --green3: #34d399;
+      --text: #e2e8f0; --muted: #64748b; --muted2: #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 90vw 70vh at 50% -20%, rgba(5,150,105,.2) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 54px; background: rgba(6,14,10,.85); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: .9rem; font-weight: 700; color: var(--green3); text-decoration: none; }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { font-size: .82rem; font-weight: 500; color: var(--muted2); text-decoration: none; }
+    .nav-links a:hover, .nav-links a.active { color: var(--green3); }
+
+    header { position: relative; z-index: 1; text-align: center; padding: 60px 20px 40px; }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800;
+      background: linear-gradient(90deg, var(--green2), var(--green3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    header p { color: var(--muted2); margin-top: 10px; font-size: .95rem; }
+
+    #grid-view { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+    #author-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+
+    .author-card {
+      background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px 18px; text-align: center; cursor: pointer; transition: all .25s; backdrop-filter: blur(8px);
+    }
+    .author-card:hover { transform: translateY(-4px); border-color: rgba(5,150,105,.4); box-shadow: 0 16px 40px rgba(0,0,0,.4); }
+    .author-photo-wrap {
+      width: 84px; height: 84px; border-radius: 50%; overflow: hidden; margin: 0 auto 14px;
+      background: var(--bg2); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border);
+    }
+    .author-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .author-photo-fallback { font-size: 1.8rem; opacity: .4; }
+    .author-name { font-family: 'Space Grotesk', sans-serif; font-size: .92rem; font-weight: 600; color: var(--green3); }
+    .author-arabic { font-size: .85rem; color: var(--muted2); margin-top: 3px; direction: rtl; }
+    .author-region { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+    .author-count { font-size: .72rem; color: var(--green2); margin-top: 8px; }
+
+    #detail-view { display: none; position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 30px 20px 80px; }
+    #detail-view.open { display: block; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted2);
+      background: none; border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px;
+      cursor: pointer; margin-bottom: 26px;
+    }
+    .back-btn:hover { color: var(--green3); border-color: var(--green); }
+    .detail-header { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 30px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .detail-photo-wrap {
+      width: 110px; height: 110px; border-radius: 50%; overflow: hidden; background: var(--bg2);
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .detail-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--green3); }
+    .detail-arabic { color: var(--muted2); margin-top: 6px; direction: rtl; }
+    .detail-region { font-size: .82rem; color: var(--muted); margin-top: 8px; }
+    .detail-bio { color: var(--muted2); font-size: .92rem; margin-top: 10px; line-height: 1.6; }
+
+    #detail-books { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .book { background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all .25s; }
+    .book:hover { transform: translateY(-4px); border-color: rgba(5,150,105,.4); }
+    .book-thumb { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+    .book-thumb-fallback { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; background: var(--bg2); }
+    .book-thumb-fallback svg { width: 34%; height: 34%; color: var(--green2); opacity: .6; }
+    .book-body { padding: 12px; }
+    .book-title { font-family: 'Space Grotesk', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    #modal-overlay.open { display: flex; }
+    #modal { background: rgba(9,20,16,.97); border: 1px solid var(--border2); border-radius: 16px; width: 100%; max-width: 860px; height: 92vh; height: 92dvh; display: flex; flex-direction: column; overflow: hidden; }
+    @media (max-width: 768px) { #modal-overlay { padding: 0; } #modal { border-radius: 0; height: 100vh; height: 100dvh; max-width: 100vw; } }
+    #modal-header { display: flex; align-items: flex-start; gap: 14px; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+    #modal-info { flex: 1; }
+    #modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: var(--green3); }
+    #modal-author { font-size: .85rem; color: var(--muted2); margin-top: 4px; }
+    #modal-close { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; padding: 6px 10px; }
+    #modal-iframe-wrap { flex: 1; background: #000; }
+    #modal-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
+    #modal-footer { display: flex; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--border); }
+    .modal-action { flex: 1; padding: 10px; border-radius: 8px; font-size: .78rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), #047857); border: 1px solid rgba(5,150,105,.4); color: #fff; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted2); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Al Ilm Al Mahfuz</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Library</a></li>
+      <li><a href="publications.html">Publications</a></li>
+      <li><a href="authors.html" class="active">Authors</a></li>
+      <li><a href="guide.html">Guide</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>Authors</h1>
+    <p>Scholars whose works are preserved here</p>
+  </header>
+
+  <div id="grid-view">
+    <div id="author-grid"><div class="empty-state">Loading…</div></div>
+  </div>
+
+  <div id="detail-view">
+    <button class="back-btn" onclick="showGrid()">← All Authors</button>
+    <div class="detail-header">
+      <div class="detail-photo-wrap">
+        <img id="detail-photo-img" src="" alt="" style="display:none">
+        <div id="detail-photo-fallback" class="author-photo-fallback">👤</div>
+      </div>
+      <div>
+        <div id="detail-name" class="detail-name"></div>
+        <div id="detail-arabic" class="detail-arabic"></div>
+        <div id="detail-region" class="detail-region"></div>
+        <div id="detail-bio" class="detail-bio"></div>
+      </div>
+    </div>
+    <div id="detail-books"></div>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal">
+      <div id="modal-header">
+        <div id="modal-info">
+          <div id="modal-title"></div>
+          <div id="modal-author"></div>
+        </div>
+        <button id="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-iframe-wrap"><iframe id="modal-iframe"></iframe></div>
+      <div id="modal-footer">
+        <a id="modal-open-link" class="modal-action btn-primary" href="#" target="_blank">Open PDF</a>
+        <button class="modal-action btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://eitbcbihrbldbfhdtumh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpdGJjYmlocmJsZGJmaGR0dW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkwNDksImV4cCI6MjA5OTE2NTA0OX0.17Do_sh7O31x2S-_P_hG-F30foIQ-fz4iKmXC9xL5Os';
+
+    async function sbSelect(table, query) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    }
+
+    const CATEGORY_ICONS = {
+      'Fatawa': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4h9l3 3v13a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M15 4v3h3"/><path d="M8 11h8M8 14h8M8 17h5"/></svg>',
+      'Hadith': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5.5A2.5 2.5 0 016.5 3H19v15H6.5A2.5 2.5 0 004 15.5v-10z"/><path d="M4 15.5A2.5 2.5 0 006.5 18H19"/><path d="M8 7h7M8 10h5"/></svg>',
+      'Fiqh': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18"/><path d="M4 7l4-2 4 2-4 10L4 7z"/><path d="M16 7l4-2 4 2-4 10-4-10z"/><path d="M4 7h16"/><path d="M6 21h12"/></svg>',
+      'Aqeedah': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3.5a8 8 0 100 17 7 7 0 01-2-13.7A8 8 0 0114 3.5z"/></svg>',
+      'Refutation': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>',
+      'Statement': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h13l4 4-4 4H3V6z"/><path d="M6 6v8"/></svg>',
+      'Biography': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c1-4 3.8-6 6.5-6s5.5 2 6.5 6"/></svg>',
+      'Arabic': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 18c2-1 3-3 3-5V6"/><path d="M11 18c2-1 3-3 3-5V6"/><path d="M18 6v7c0 2.5 1 4 2 5"/></svg>',
+      'History': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>',
+      'default': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5.5A2.5 2.5 0 016.5 3H19v15H6.5A2.5 2.5 0 004 15.5v-10z"/><path d="M4 15.5A2.5 2.5 0 006.5 18H19"/></svg>',
+    };
+
+    let allAuthors = [];
+    let allBooks = [];
+
+    async function loadData() {
+      try {
+        const [authors, books] = await Promise.all([
+          sbSelect('authors', 'select=*&order=created_at.desc'),
+          sbSelect('books', 'select=*&order=created_at.desc')
+        ]);
+        allAuthors = authors || [];
+        allBooks = books || [];
+        renderGrid();
+        handleHash();
+      } catch (e) {
+        document.getElementById('author-grid').innerHTML = `<div class="empty-state">Could not load authors. ${e.message}</div>`;
+      }
+    }
+    loadData();
+
+    function renderGrid() {
+      const grid = document.getElementById('author-grid');
+      if (allAuthors.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No authors yet.</div>';
+        return;
+      }
+      grid.innerHTML = '';
+      allAuthors.forEach(author => {
+        const count = allBooks.filter(b => b.author && b.author.toLowerCase() === author.name.toLowerCase()).length;
+        const card = document.createElement('div');
+        card.className = 'author-card';
+        card.innerHTML = `
+          <div class="author-photo-wrap">
+            ${author.photo_url ? `<img src="${author.photo_url}" alt="${author.name}">` : `<div class="author-photo-fallback">👤</div>`}
+          </div>
+          <div class="author-name">${author.name}</div>
+          ${author.arabic ? `<div class="author-arabic">${author.arabic}</div>` : ''}
+          ${author.region ? `<div class="author-region">${author.region}</div>` : ''}
+          <div class="author-count">${count} book${count !== 1 ? 's' : ''}</div>
+        `;
+        card.addEventListener('click', () => showDetail(author.id));
+        grid.appendChild(card);
+      });
+    }
+
+    function showDetail(authorId) {
+      const author = allAuthors.find(a => a.id === authorId);
+      if (!author) return;
+      const authorBooks = allBooks.filter(b => b.author && b.author.toLowerCase() === author.name.toLowerCase());
+
+      document.getElementById('detail-name').textContent = author.name;
+      document.getElementById('detail-arabic').textContent = author.arabic || '';
+      document.getElementById('detail-region').textContent = author.region || '';
+      document.getElementById('detail-bio').textContent = author.bio || '';
+
+      const photoImg = document.getElementById('detail-photo-img');
+      const photoFallback = document.getElementById('detail-photo-fallback');
+      if (author.photo_url) {
+        photoImg.src = author.photo_url; photoImg.style.display = 'block'; photoFallback.style.display = 'none';
+      } else {
+        photoImg.style.display = 'none'; photoFallback.style.display = 'flex';
+      }
+
+      const booksContainer = document.getElementById('detail-books');
+      booksContainer.innerHTML = '';
+      if (authorBooks.length === 0) {
+        booksContainer.innerHTML = '<div class="empty-state">No books found for this author.</div>';
+      } else {
+        authorBooks.forEach(book => {
+          const icon = CATEGORY_ICONS[book.category] || CATEGORY_ICONS.default;
+          const card = document.createElement('div');
+          card.className = 'book';
+          card.innerHTML = `
+            ${book.cover_url ? `<img class="book-thumb" src="${book.cover_url}" alt="${book.title}">` : `<div class="book-thumb-fallback">${icon}</div>`}
+            <div class="book-body"><div class="book-title">${book.title}</div></div>
+          `;
+          card.addEventListener('click', () => openModal(book));
+          booksContainer.appendChild(card);
+        });
+      }
+
+      document.getElementById('grid-view').style.display = 'none';
+      document.getElementById('detail-view').classList.add('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      history.replaceState(null, '', `#${authorId}`);
+    }
+
+    function showGrid() {
+      document.getElementById('detail-view').classList.remove('open');
+      document.getElementById('grid-view').style.display = 'block';
+      history.replaceState(null, '', window.location.pathname);
+    }
+
+    function handleHash() {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) showDetail(hash);
+    }
+    window.addEventListener('hashchange', handleHash);
+
+    function openModal(book) {
+      document.getElementById('modal-title').textContent = book.title;
+      document.getElementById('modal-author').textContent = [book.author, book.publication].filter(Boolean).join(' · ');
+      document.getElementById('modal-iframe').src = book.pdf_url;
+      document.getElementById('modal-open-link').href = book.pdf_url;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.getElementById('modal-iframe').src = '';
+      document.body.style.overflow = '';
+    }
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>
