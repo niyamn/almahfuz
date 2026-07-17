@@ -70,7 +70,7 @@
     }
     .tagline { font-size: 1rem; color: var(--muted2); font-weight: 400; line-height: 1.6; max-width: 480px; margin: 0 auto 40px; }
 
-    .stats-row { display: flex; justify-content: center; gap: 0; margin-bottom: 48px; flex-wrap: wrap; }
+    .stats-row { display: flex; justify-content: center; gap: 0; margin-bottom: 48px; }
     .stat-item { padding: 16px 32px; border-right: 1px solid var(--border); text-align: center; }
     .stat-item:last-child { border-right: none; }
     .stat-num {
@@ -165,27 +165,9 @@
       display: inline-block; width: fit-content;
     }
     .book-title { font-family: 'Space Grotesk', sans-serif; font-size: .92rem; font-weight: 600; color: var(--text); line-height: 1.35; letter-spacing: -.01em; }
-    .book-author {
-      font-size: .82rem;
-      color: var(--muted2);
-      line-height: 1.6;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 4px 8px;
-    }
-    .book-author .pub-link {
-      color: var(--green2);
-      text-decoration: none;
-      transition: color .2s;
-      white-space: nowrap;
-    }
-    .book-author .pub-link:hover { color: var(--green3); text-decoration: underline; }
-    .book-author .sep {
-      color: var(--border2);
-      font-weight: 300;
-      display: inline-block;
-    }
+    .book-author { font-size: .82rem; color: var(--muted2); line-height: 1.4; }
+    .pub-link { color: var(--green2); text-decoration: none; transition: color .2s; }
+    .pub-link:hover { color: var(--green3); text-decoration: underline; }
     .book-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; flex: 1; }
     .book-btn {
       margin-top: auto; padding: 10px 0; background: linear-gradient(135deg, rgba(5,150,105,.3), rgba(5,150,105,.15));
@@ -206,12 +188,10 @@
     #books.list-view .book-body { flex-direction: row; align-items: center; padding: 0; flex: 1; gap: 14px; min-width: 0; }
     #books.list-view .book-category { display: none; }
     #books.list-view .book-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #books.list-view .book-author { flex-shrink: 0; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-wrap: nowrap; }
+    #books.list-view .book-author { flex-shrink: 0; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: none; }
     #books.list-view .book-desc { display: none; }
     #books.list-view .book-btn { width: auto; padding: 8px 16px; margin-top: 0; white-space: nowrap; }
-    @media (min-width: 600px) {
-      #books.list-view .book-author { display: flex; }
-    }
+    @media (min-width: 600px) { #books.list-view .book-author { display: block; } }
 
     #empty { display: none; position: relative; z-index: 1; text-align: center; padding: 80px 20px; color: var(--muted); }
     #empty .empty-icon { font-size: 3rem; margin-bottom: 14px; }
@@ -262,6 +242,8 @@
 
     #modal-footer { display: flex; gap: 10px; padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; background: rgba(0,0,0,.2); }
     .modal-action { flex: 1; padding: 8px 12px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-size: .75rem; font-weight: 600; letter-spacing: .04em; cursor: pointer; transition: all .2s; text-align: center; text-decoration: none; min-width: 80px; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), #047857); border: 1px solid rgba(5,150,105,.4); color: #fff; }
+    .btn-primary:hover { box-shadow: 0 4px 16px rgba(5,150,105,.3); }
     .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted2); }
     .btn-secondary:hover { border-color: var(--green); color: var(--green3); }
     .btn-copy { background: transparent; border: 1px solid var(--border); color: var(--muted2); }
@@ -296,23 +278,11 @@
       .hero { padding: 52px 20px 40px; }
       #books { grid-template-columns: 1fr 1fr; gap: 12px; }
       .stats-row { gap: 0; }
-      .stat-item { padding: 12px 20px; }
+      .stat-item { padding: 10px 8px; flex: 1; min-width: 0; }
+      .stat-num { font-size: 1.4rem; }
+      .stat-label { font-size: .6rem; letter-spacing: .04em; white-space: nowrap; }
       nav { padding: 0 16px; }
       .nav-links { gap: 16px; }
-      .book-author { font-size: .75rem; gap: 2px 6px; }
-      .book-author .sep { display: none; }
-      .book-author .pub-link:not(:last-child)::after { content: ' · '; color: var(--border2); }
-      .book-author .pub-link:last-child::after { display: none; }
-      #books.list-view .book-author { max-width: 120px; font-size: .7rem; }
-    }
-
-    @media (max-width: 480px) {
-      #books { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .book-body { padding: 10px 10px 12px; gap: 6px; }
-      .book-title { font-size: .8rem; }
-      .book-author { font-size: .7rem; gap: 2px 4px; }
-      .book-btn { font-size: .7rem; padding: 8px 0; }
-      #modal-footer .modal-action { font-size: .65rem; padding: 6px 8px; min-width: 60px; }
     }
   </style>
 </head>
@@ -392,7 +362,7 @@
       </div>
 
       <div id="modal-footer">
-        <button id="modal-download-btn" class="modal-action btn-copy" onclick="downloadCurrentBook()">⬇ Download</button>
+        <button id="modal-download-btn" class="modal-action btn-primary" onclick="downloadCurrentBook()">⬇ Download</button>
         <button id="modal-bookmark-btn" class="modal-action btn-bookmark-modal" onclick="toggleBookmarkFromModal()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z"/></svg>Save</button>
         <button id="modal-copy-btn" class="modal-action btn-copy" onclick="copyBookLink()">🔗 Copy Link</button>
         <button class="modal-action btn-secondary" onclick="closeModal()">Close</button>
@@ -629,8 +599,7 @@
         const pubPart = book.publication
           ? `<a href="publications.html#${slugify(book.publication)}" class="pub-link" onclick="event.stopPropagation()">${book.publication}</a>`
           : '';
-        const metaParts = [authorPart, pubPart].filter(Boolean);
-        const metaLine = metaParts.length > 0 ? metaParts.join('') : '';
+        const metaLine = [authorPart, pubPart].filter(Boolean).join(' · ');
         const bookmarked = isBookmarked(book.id);
 
         const thumbHtml = book.cover_url
@@ -708,7 +677,7 @@
           <div style="text-align:center;padding:60px 20px;color:#64748b;">
             <div style="font-size:3rem;margin-bottom:16px;">📄</div>
             <p style="margin-bottom:12px;">Could not load this PDF.</p>
-            <p style="font-size:0.85rem;">Click "Download" to save it locally.</p>
+            <p style="font-size:0.85rem;">Click "Open PDF" to view directly in your browser.</p>
           </div>
         `;
       }
