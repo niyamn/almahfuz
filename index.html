@@ -361,6 +361,7 @@
 
       <div id="modal-footer">
         <a id="modal-open-link" class="modal-action btn-primary" href="#" target="_blank">📄 Open PDF</a>
+        <button id="modal-download-btn" class="modal-action btn-copy" onclick="downloadCurrentBook()">⬇ Download</button>
         <button id="modal-bookmark-btn" class="modal-action btn-bookmark-modal" onclick="toggleBookmarkFromModal()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z"/></svg>Save</button>
         <button id="modal-copy-btn" class="modal-action btn-copy" onclick="copyBookLink()">🔗 Copy Link</button>
         <button class="modal-action btn-secondary" onclick="closeModal()">Close</button>
@@ -729,6 +730,39 @@
       document.body.style.overflow = '';
       currentBookId = null;
       history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
+    async function downloadCurrentBook() {
+      const book = allBooks.find(b => b.id === currentBookId);
+      if (!book || !book.pdf_url) return;
+
+      const btn = document.getElementById('modal-download-btn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Downloading…';
+      btn.style.pointerEvents = 'none';
+
+      try {
+        const res = await fetch(book.pdf_url);
+        if (!res.ok) throw new Error('Fetch failed');
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const filename = (book.title || 'book').replace(/[^\w\s.-]/g, '').trim() + '.pdf';
+
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      } catch (e) {
+        // Cross-origin fetch blocked or failed — fall back to opening it directly,
+        // where the browser's own PDF viewer usually still offers a download option.
+        window.open(book.pdf_url, '_blank');
+      } finally {
+        btn.textContent = originalText;
+        btn.style.pointerEvents = '';
+      }
     }
 
     function copyBookLink() {
