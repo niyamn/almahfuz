@@ -130,10 +130,10 @@
     #books { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; max-width: 1140px; margin: 0 auto 80px; padding: 0 20px; }
 
     .book {
-      background: rgba(11,26,19,.7); border: 1px solid var(--border); border-radius: 14px; padding: 0;
+      background: rgba(11,26,19,.86); border: 1px solid var(--border); border-radius: 14px; padding: 0;
       display: flex; flex-direction: column; cursor: pointer;
       transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;
-      animation: fadeUp .45s ease both; position: relative; overflow: hidden; backdrop-filter: blur(8px);
+      animation: fadeUp .45s ease both; position: relative; overflow: hidden;
     }
     .book::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -151,7 +151,7 @@
 
     .bookmark-btn {
       position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%;
-      background: rgba(6,14,10,.7); border: 1px solid var(--border); backdrop-filter: blur(6px);
+      background: rgba(6,14,10,.85); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2;
       font-size: .92rem; transition: all .2s; opacity: .85;
     }
@@ -242,7 +242,7 @@
     .pdf-focus-btn svg { width: 19px; height: 19px; }
 
     /* Scroll Mode PDF Viewer */
-    #pdf-viewer-wrap { flex: 1; position: relative; overflow: auto; background: #0a0a0a; padding: 20px; }
+    #pdf-viewer-wrap { flex: 1; min-height: 0; position: relative; overflow: auto; background: #0a0a0a; padding: 20px; }
     #pdf-container { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 100%; margin: 0 auto; }
     #pdf-container canvas { box-shadow: 0 4px 20px rgba(0,0,0,0.7); border-radius: 4px; background: white; max-width: 100%; height: auto; }
     .pdf-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .9rem; background: rgba(0,0,0,0.8); z-index: 5; flex-direction: column; gap: 12px; }
@@ -670,7 +670,10 @@
     }
 
     // ── PDF Rendering (Scroll Mode) ──
+    let pdfLoadToken = 0;
+
     async function loadPDF(url) {
+      const myToken = ++pdfLoadToken;
       const loadingEl = document.getElementById('pdf-loading');
       loadingEl.classList.remove('hidden');
       const container = document.getElementById('pdf-container');
@@ -680,25 +683,30 @@
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch PDF');
         const arrayBuffer = await response.arrayBuffer();
-        
+        if (myToken !== pdfLoadToken) return; // a newer book was opened while this was loading
+
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        if (myToken !== pdfLoadToken) return;
         const numPages = pdf.numPages;
         
         // Render all pages stacked vertically
-        const outputScale = window.devicePixelRatio || 1;
+        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
         for (let i = 1; i <= numPages; i++) {
+          if (myToken !== pdfLoadToken) return; // abort — a newer book has since been opened
+
           const page = await pdf.getPage(i);
+          if (myToken !== pdfLoadToken) return;
           const viewport = page.getViewport({ scale: currentScale });
           
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
 
-          // Render buffer at full device pixel density for sharp text,
-          // while keeping the on-screen (CSS) size the same as before.
+          // Render buffer at device pixel density (capped at 2x) for sharp text
+          // without the extra cost of full 3x on very high-density phones.
           canvas.width = Math.floor(viewport.width * outputScale);
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = Math.floor(viewport.width) + 'px';
-          canvas.style.height = Math.floor(viewport.height) + 'px';
+          canvas.style.height = 'auto';
           canvas.style.marginBottom = '8px';
           canvas.style.borderRadius = '4px';
           canvas.style.boxShadow = '0 4px 20px rgba(0,0,0,0.7)';
@@ -706,11 +714,14 @@
 
           const renderTransform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined;
           await page.render({ canvasContext: context, viewport: viewport, transform: renderTransform }).promise;
+          if (myToken !== pdfLoadToken) return; // abort before appending stale content
+
           container.appendChild(canvas);
         }
         
         loadingEl.classList.add('hidden');
       } catch (error) {
+        if (myToken !== pdfLoadToken) return;
         console.error('PDF load error:', error);
         loadingEl.classList.add('hidden');
         container.innerHTML = `
